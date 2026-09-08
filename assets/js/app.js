@@ -5,7 +5,7 @@ const MSAL_CONFIG = {
   auth: {
     clientId: "9c04551b-3267-4a30-a212-ec9143838eb6",
     authority: "https://login.microsoftonline.com/deb13623-4618-4c6b-a268-3d5e4dec1c30",
-    redirectUri: "https://celadev-sistemas.github.io/mayita-survey/",
+    redirectUri: "https://celadev-sistemas.github.io/mayita-proyectos/",
   },
   cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: true },
   system: { allowNativeBroker: false }
