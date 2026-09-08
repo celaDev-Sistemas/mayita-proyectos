@@ -38,11 +38,26 @@ const PROJECT_TYPES = [
     value: "Proyecto Corporativo",
     icon: "🏢",
     questions: [
-      "¿El proyecto cumplió con los objetivos establecidos?",
-      "¿La ejecución del proyecto se realizó de manera adecuada?",
-      "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?",
-      "¿Los resultados obtenidos cumplieron con tus expectativas?",
-      "¿Qué tan satisfecho estás con el proyecto en general?"
+      {
+        type: "likert",
+        text: "¿Qué tan satisfecho(a) estás con el seguimiento recibido durante tu proyecto?"
+      },
+      {
+        type: "likert",
+        text: "¿Qué tan oportuno fue el seguimiento de pendientes, fechas y próximos pasos?"
+      },
+      {
+        type: "likert",
+        text: "¿Qué tan claro fue el acompañamiento sobre los procesos y aprobaciones necesarias?"
+      },
+      {
+        type: "likert",
+        text: "¿Consideras que el seguimiento ayudó a identificar oportunamente riesgos o atrasos?"
+      },
+      {
+        type: "text",
+        text: "¿Qué podríamos mejorar en el acompañamiento de futuros proyectos?"
+      }
     ]
   },
 
@@ -50,11 +65,26 @@ const PROJECT_TYPES = [
     value: "Proyectos IA",
     icon: "🤖",
     questions: [
-      "¿La solución de IA cumplió con el objetivo planteado?",
-      "¿La solución implementada facilita el proceso para el cual fue desarrollada?",
-      "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?",
-      "¿Los resultados generados por la solución cumplen con tus expectativas?",
-      "¿Qué tan satisfecho estás con el proyecto de IA en general?"
+      {
+        type: "likert",
+        text: "¿Qué tan satisfecho(a) estás con el seguimiento recibido durante tu proyecto?"
+      },
+      {
+        type: "likert",
+        text: "¿Qué tan oportuno fue el seguimiento de pendientes, fechas y próximos pasos?"
+      },
+      {
+        type: "likert",
+        text: "¿Qué tan claro fue el acompañamiento sobre los procesos y aprobaciones necesarias?"
+      },
+      {
+        type: "likert",
+        text: "¿Consideras que el seguimiento ayudó a identificar oportunamente riesgos o atrasos?"
+      },
+      {
+        type: "text",
+        text: "¿Qué podríamos mejorar en el acompañamiento de futuros proyectos?"
+      }
     ]
   },
 
@@ -62,11 +92,26 @@ const PROJECT_TYPES = [
     value: "Proyectos Sistemas",
     icon: "💻",
     questions: [
-      "¿El proyecto cumplió con los requerimientos establecidos?",
-      "¿La solución implementada funciona de acuerdo con lo esperado?",
-      "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?",
-      "¿La solución implementada facilita tus actividades o procesos?",
-      "¿Qué tan satisfecho estás con el proyecto de Sistemas en general?"
+      {
+        type: "likert",
+        text: "¿El proyecto cumplió con los requerimientos establecidos?"
+      },
+      {
+        type: "likert",
+        text: "¿La solución implementada funciona de acuerdo con lo esperado?"
+      },
+      {
+        type: "likert",
+        text: "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?"
+      },
+      {
+        type: "likert",
+        text: "¿La solución implementada facilita tus actividades o procesos?"
+      },
+      {
+        type: "text",
+        text: "¿Qué podríamos mejorar en futuros proyectos de Sistemas?"
+      }
     ]
   }
 ];
@@ -117,9 +162,27 @@ let activeQuestions = [];
 // UTILS
 // ════════════════════════════════════════════════════
 function shuffle(a){return [...a].sort(()=>Math.random()-.5);}
-function getScore(){
-  const t=surveyAnswers.reduce((s,a)=>s+a,0);
-  return Math.round((t/(surveyAnswers.length*5))*100);
+function getScore() {
+  const respuestasLikert = surveyAnswers.filter(
+    respuesta =>
+      typeof respuesta === "number" &&
+      Number.isFinite(respuesta)
+  );
+
+  if (!respuestasLikert.length) {
+    return 0;
+  }
+
+  const total = respuestasLikert.reduce(
+    (suma, valor) => suma + valor,
+    0
+  );
+
+  const maximo = respuestasLikert.length * 5;
+
+  return Math.round(
+    (total / maximo) * 100
+  );
 }
 function getLabel(sc){
   if(sc>=80)return "excelente";if(sc>=60)return "bueno";
@@ -897,8 +960,15 @@ function renderProjectTypeQuestion() {
 
   dots.appendChild(projectDot);
 
-  // Como actualmente todos tienen 5 preguntas
-  for (let i = 0; i < 5; i++) {
+
+  const maxQuestions = Math.max(
+    ...PROJECT_TYPES.map(
+      project => project.questions.length
+    )
+  );
+
+
+  for (let i = 0; i < maxQuestions; i++) {
 
     const dot =
       document.createElement("div");
@@ -911,15 +981,18 @@ function renderProjectTypeQuestion() {
     dots.appendChild(dot);
   }
 
+
   document.getElementById(
     "quiz-question"
   ).textContent =
     "¿Qué tipo de proyecto deseas evaluar?";
 
+
   document.getElementById(
     "quiz-parrot"
   ).innerHTML =
     parrotSVG("idle", 180);
+
 
   const likertBar =
     document.querySelector(".likert-bar");
@@ -927,6 +1000,7 @@ function renderProjectTypeQuestion() {
   if (likertBar) {
     likertBar.style.display = "none";
   }
+
 
   const opts =
     document.getElementById("likert-opts");
@@ -947,13 +1021,16 @@ function renderProjectTypeQuestion() {
       document.createElement("button");
 
     button.type = "button";
+
     button.className = "imp-btn";
 
     button.style.minHeight = "76px";
+
     button.style.justifyContent =
       "flex-start";
 
     button.style.textAlign = "left";
+
 
     button.innerHTML = `
       <span style="
@@ -964,9 +1041,7 @@ function renderProjectTypeQuestion() {
         ${project.icon}
       </span>
 
-      <span style="
-        font-weight:800;
-      ">
+      <span style="font-weight:800;">
         ${project.value}
       </span>
     `;
@@ -979,10 +1054,17 @@ function renderProjectTypeQuestion() {
         selectedProjectType =
           project.value;
 
+
         activeQuestions =
-          [...project.questions];
+          project.questions.map(
+            question => ({
+              ...question
+            })
+          );
+
 
         surveyAnswers = [];
+
         currentQ = 0;
 
 
@@ -996,6 +1078,7 @@ function renderProjectTypeQuestion() {
 
 
         button.classList.add("sel");
+
 
         projectDot.style.background =
           "#ff8c42";
@@ -1014,7 +1097,6 @@ function renderProjectTypeQuestion() {
 
 
     opts.appendChild(button);
-
   });
 
 
@@ -1028,81 +1110,108 @@ function renderProjectTypeQuestion() {
 function renderQuiz() {
 
   if (!activeQuestions.length) {
+
     renderProjectTypeQuestion();
+
     return;
   }
 
 
-  const likertBar =
-    document.querySelector(".likert-bar");
+  const question =
+    activeQuestions[currentQ];
 
-  if (likertBar) {
-    likertBar.style.display = "block";
+
+  if (!question) {
+
+    goToImprovement();
+
+    return;
   }
 
 
   const opts =
-    document.getElementById("likert-opts");
-
-  opts.style.display = "flex";
-  opts.style.gridTemplateColumns = "";
-  opts.style.gap = "6px";
+    document.getElementById(
+      "likert-opts"
+    );
 
 
-  // ─────────────────────────────────────
-  // PROGRESS DOTS
-  // ─────────────────────────────────────
+  const likertBar =
+    document.querySelector(
+      ".likert-bar"
+    );
+
 
   const dots =
-    document.getElementById("quiz-dots");
+    document.getElementById(
+      "quiz-dots"
+    );
+
 
   dots.innerHTML = "";
 
 
-  activeQuestions.forEach((_, i) => {
+  activeQuestions.forEach(
+    (_, i) => {
 
-    const d =
-      document.createElement("div");
+      const d =
+        document.createElement("div");
 
-    d.className = "prog-dot";
-    d.id = `dot-${i}`;
+      d.className = "prog-dot";
 
-    d.style.width =
-      i < surveyAnswers.length
-        ? "22px"
-        : "10px";
+      d.id = `dot-${i}`;
 
 
-    if (i < surveyAnswers.length) {
+      d.style.width =
+        i < surveyAnswers.length
+          ? "22px"
+          : "10px";
 
-      d.style.background =
-        getLikertByVal(
-          surveyAnswers[i]
-        ).color;
 
-    } else if (i === currentQ) {
+      if (i < surveyAnswers.length) {
 
-      d.style.background =
-        "rgba(255,255,255,.65)";
+        const answer =
+          surveyAnswers[i];
 
+
+        if (
+          typeof answer === "number"
+        ) {
+
+          d.style.background =
+            getLikertByVal(
+              answer
+            ).color;
+
+        } else {
+
+          d.style.background =
+            "#ff8c42";
+        }
+
+      } else if (
+        i === currentQ
+      ) {
+
+        d.style.background =
+          "rgba(255,255,255,.65)";
+      }
+
+
+      dots.appendChild(d);
     }
-
-    dots.appendChild(d);
-
-  });
+  );
 
 
   document.getElementById(
     "quiz-progress-label"
   ).textContent =
-    `${selectedProjectType} · ` +
-    `Pregunta ${currentQ + 1}/${activeQuestions.length}`;
+    `${selectedProjectType} · Pregunta ${currentQ + 1}/${activeQuestions.length}`;
 
 
   document.getElementById(
     "quiz-question"
   ).textContent =
-    activeQuestions[currentQ];
+    question.text;
 
 
   document.getElementById(
@@ -1111,9 +1220,131 @@ function renderQuiz() {
     parrotSVG("idle", 180);
 
 
-  // ─────────────────────────────────────
-  // LIKERT
-  // ─────────────────────────────────────
+  document
+    .getElementById("bubble-wrap")
+    .querySelector(".bubble")
+    ?.remove();
+
+
+  // ═══════════════════════════════════════
+  // PREGUNTA ABIERTA
+  // ═══════════════════════════════════════
+
+  if (question.type === "text") {
+
+    if (likertBar) {
+      likertBar.style.display =
+        "none";
+    }
+
+
+    opts.style.display = "block";
+
+    opts.style.gridTemplateColumns =
+      "";
+
+    opts.style.gap = "";
+
+
+    opts.innerHTML = `
+
+      <textarea
+        id="project-text-answer"
+        class="input"
+        placeholder="Escribe tu respuesta aquí..."
+        style="
+          width:100%;
+          min-height:120px;
+          margin-top:4px;
+          resize:vertical;
+        "
+      ></textarea>
+
+      <div
+        id="project-text-error"
+        class="err-msg"
+        style="margin-top:7px;"
+      >
+        ⚠ Escribe una respuesta para continuar.
+      </div>
+
+      <button
+        id="btn-project-text"
+        type="button"
+        class="btn-primary"
+        style="margin-top:12px;"
+      >
+        Continuar →
+      </button>
+    `;
+
+
+    const textarea =
+      document.getElementById(
+        "project-text-answer"
+      );
+
+
+    const error =
+      document.getElementById(
+        "project-text-error"
+      );
+
+
+    textarea.addEventListener(
+      "input",
+      () => {
+
+        if (
+          textarea.value.trim()
+        ) {
+
+          error.classList.remove(
+            "show"
+          );
+        }
+
+      }
+    );
+
+
+    document
+      .getElementById(
+        "btn-project-text"
+      )
+      .addEventListener(
+        "click",
+        handleTextAnswer
+      );
+
+
+    setTimeout(
+      () => textarea.focus(),
+      100
+    );
+
+
+    return;
+  }
+
+
+  // ═══════════════════════════════════════
+  // PREGUNTA LIKERT
+  // ═══════════════════════════════════════
+
+  if (likertBar) {
+
+    likertBar.style.display =
+      "block";
+  }
+
+
+  opts.style.display = "flex";
+
+  opts.style.gridTemplateColumns =
+    "";
+
+  opts.style.gap = "6px";
 
   opts.innerHTML = "";
 
@@ -1121,23 +1352,33 @@ function renderQuiz() {
   LIKERT.forEach((lk) => {
 
     const b =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
 
-    b.className = "lk-btn";
 
-    b.dataset.val = lk.v;
+    b.className =
+      "lk-btn";
+
+
+    b.dataset.val =
+      lk.v;
+
 
     b.style.background =
       `${lk.color}22`;
 
+
     b.style.borderColor =
       `${lk.color}55`;
+
 
     b.style.color =
       lk.color;
 
 
     b.innerHTML = `
+
       <span class="lk-icon">
         ${lk.icon}
       </span>
@@ -1154,58 +1395,73 @@ function renderQuiz() {
 
     b.addEventListener(
       "click",
-      () => handleAnswer(lk.v)
+      () =>
+        handleAnswer(
+          lk.v
+        )
     );
 
 
     opts.appendChild(b);
-
   });
 
 
   document.getElementById(
     "likert-thumb"
-  ).style.display = "none";
-
-
-  document
-    .getElementById("bubble-wrap")
-    .querySelector(".bubble")
-    ?.remove();
+  ).style.display =
+    "none";
 }
 
 
 function handleAnswer(value) {
 
-  if (answering) return;
+  if (answering) {
+    return;
+  }
+
 
   answering = true;
+
   selectedVal = value;
 
 
   document
-    .querySelectorAll(".lk-btn")
+    .querySelectorAll(
+      ".lk-btn"
+    )
     .forEach((b) => {
 
       b.disabled = true;
 
+
       if (
-        parseInt(b.dataset.val) === value
+        parseInt(
+          b.dataset.val
+        ) === value
       ) {
 
         const lk =
-          getLikertByVal(value);
+          getLikertByVal(
+            value
+          );
 
-        b.classList.add("sel");
+
+        b.classList.add(
+          "sel"
+        );
+
 
         b.style.background =
           lk.color;
 
+
         b.style.borderColor =
           lk.color;
 
+
         b.style.color =
           "#fff";
+
 
         b.style.boxShadow =
           `0 8px 24px ${lk.color}55,` +
@@ -1215,36 +1471,40 @@ function handleAnswer(value) {
     });
 
 
-  // Thumb
-
   const thumb =
     document.getElementById(
       "likert-thumb"
     );
 
+
   const lk =
     getLikertByVal(value);
 
-  thumb.style.display = "block";
+
+  thumb.style.display =
+    "block";
+
 
   thumb.style.left =
     `${((value - 1) / 4) * 100}%`;
+
 
   thumb.style.background =
     lk.color;
 
 
-  // Reacción de mayITa
-
   const mood =
     getMoodFromVal(value);
+
 
   const reactionsForMood =
     REACTIONS[mood] || [];
 
+
   const qiText =
     reactionsForMood[
-      currentQ % reactionsForMood.length
+      currentQ %
+      reactionsForMood.length
     ] ||
     "¡Gracias por tu respuesta! 🦜";
 
@@ -1252,13 +1512,20 @@ function handleAnswer(value) {
   document.getElementById(
     "quiz-parrot"
   ).innerHTML =
-    parrotSVG(mood, 180);
+    parrotSVG(
+      mood,
+      180
+    );
 
 
   const pSvg =
     document
-      .getElementById("quiz-parrot")
-      .querySelector("svg");
+      .getElementById(
+        "quiz-parrot"
+      )
+      .querySelector(
+        "svg"
+      );
 
 
   if (pSvg) {
@@ -1267,14 +1534,12 @@ function handleAnswer(value) {
       "parrot-idle"
     );
 
+
     pSvg.classList.add(
       "parrot-bounce"
     );
-
   }
 
-
-  // Burbuja
 
   const wrap =
     document.getElementById(
@@ -1288,10 +1553,14 @@ function handleAnswer(value) {
 
 
   const bub =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
 
-  bub.className = "bubble";
+  bub.className =
+    "bubble";
+
 
   bub.style.borderColor =
     lk.color;
@@ -1307,7 +1576,9 @@ function handleAnswer(value) {
       "
     ></div>
 
-    <div class="tail-white"></div>
+    <div
+      class="tail-white"
+    ></div>
   `;
 
 
@@ -1326,40 +1597,98 @@ function handleAnswer(value) {
 
     bub.remove();
 
+
     surveyAnswers.push(
       Number(value)
     );
 
-    answering = false;
-    selectedVal = null;
+
+    answering =
+      false;
 
 
-    if (
-      surveyAnswers.length >=
-      activeQuestions.length
-    ) {
-
-      document.getElementById(
-        "quiz-parrot"
-      ).innerHTML =
-        parrotSVG("done", 180);
+    selectedVal =
+      null;
 
 
-      setTimeout(
-        () => goToImprovement(),
-        700
+    avanzarPregunta();
+
+  }, 1800);
+}
+
+
+function handleTextAnswer() {
+
+  const textarea =
+    document.getElementById(
+      "project-text-answer"
+    );
+
+
+  const error =
+    document.getElementById(
+      "project-text-error"
+    );
+
+
+  const value =
+    textarea.value.trim();
+
+
+  if (!value) {
+
+    error.classList.add(
+      "show"
+    );
+
+
+    textarea.focus();
+
+    return;
+  }
+
+
+  surveyAnswers.push(
+    value
+  );
+
+
+  avanzarPregunta();
+}
+
+
+function avanzarPregunta() {
+
+  if (
+    surveyAnswers.length >=
+    activeQuestions.length
+  ) {
+
+    document.getElementById(
+      "quiz-parrot"
+    ).innerHTML =
+      parrotSVG(
+        "done",
+        180
       );
 
-    } else {
 
-      currentQ =
-        surveyAnswers.length;
+    setTimeout(
+      () =>
+        goToImprovement(),
+      500
+    );
 
-      renderQuiz();
 
-    }
+    return;
+  }
 
-  }, 2500);
+
+  currentQ =
+    surveyAnswers.length;
+
+
+  renderQuiz();
 }
 
 // ════════════════════════════════════════════════════
@@ -1613,48 +1942,81 @@ async function handleSubmit() {
   showScreen("s-sending");
 
 
-  const puntajeTotal =
-    surveyAnswers.reduce(
-      (total, valor) =>
-        total + Number(valor || 0),
-      0
+const respuestasLikert =
+  activeQuestions
+    .map((pregunta, index) => ({
+      pregunta,
+      respuesta: surveyAnswers[index]
+    }))
+    .filter(
+      item =>
+        item.pregunta.type === "likert"
     );
 
 
-  const porcentajeSatisfaccion =
-    getScore();
+const puntajeTotal =
+  respuestasLikert.reduce(
+    (total, item) =>
+      total +
+      Number(
+        item.respuesta || 0
+      ),
+    0
+  );
 
 
-  const areasMejora =
-    improvements.filter(
-      opcion => opcion !== "Otra"
-    );
+const porcentajeSatisfaccion =
+  getScore();
 
 
-  const otraAreaMejora =
-    improvements.includes("Otra")
-      ? otherText.trim()
-      : "";
+const areasMejora =
+  improvements.filter(
+    opcion =>
+      opcion !== "Otra"
+  );
 
 
-  // ─────────────────────────────────────
-  // RESPUESTAS DINÁMICAS
-  // ─────────────────────────────────────
+const otraAreaMejora =
+  improvements.includes("Otra")
+    ? otherText.trim()
+    : "";
 
-  const respuestas =
-    activeQuestions.map(
-      (pregunta, index) => ({
+
+const respuestas =
+  activeQuestions.map(
+    (pregunta, index) => {
+
+      const respuesta =
+        surveyAnswers[index];
+
+
+      return {
+
         numeroPregunta:
           index + 1,
 
-        pregunta,
+        pregunta:
+          pregunta.text,
+
+        tipoRespuesta:
+          pregunta.type,
 
         valor:
-          Number(
-            surveyAnswers[index] || 0
-          )
-      })
-    );
+          pregunta.type === "likert"
+            ? Number(
+                respuesta || 0
+              )
+            : null,
+
+        respuestaTexto:
+          pregunta.type === "text"
+            ? String(
+                respuesta || ""
+              ).trim()
+            : ""
+      };
+    }
+  );
 
 
   const payload = {
