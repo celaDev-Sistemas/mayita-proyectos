@@ -19,9 +19,9 @@ const VALID_DOMAINS = [
 ];
 
 const N8N_WEBHOOK_URL =
-  "https://celaque.app.n8n.cloud/webhook/mayita/encuesta";
+    "https://celaque.app.n8n.cloud/webhook/b684c1f5-264c-43b1-843a-4acb8175a1bb";
 
-  const N8N_RANKING_SAVE_URL =
+const N8N_RANKING_SAVE_URL =
   "https://celaque.app.n8n.cloud/webhook/mayita/ranking";
 
 const N8N_RANKING_TOP_URL =
@@ -30,34 +30,47 @@ const N8N_RANKING_TOP_URL =
 const APP_VERSION = "1.0";
 
 // ════════════════════════════════════════════════════
-// DATA
+// DATA — MAYITA PROYECTOS
 // ════════════════════════════════════════════════════
-const QUESTIONS = [
-  "¿Cómo fue el tiempo de respuesta del equipo de TI?",
-  "¿El técnico resolvió tu problema de forma efectiva?",
-  "¿La comunicación y el seguimiento durante la atención de tu solicitud fueron adecuados?",
-  "¿Quedaste satisfecho con la solución brindada?",
-  "¿Consideras que la comunicación durante la atención fue clara y cordial?"
-];
 
-const REQUEST_TYPES = [
+const PROJECT_TYPES = [
   {
-    value: "Solicitud de Mejora",
-    icon: "💡"
+    value: "Proyecto Corporativo",
+    icon: "🏢",
+    questions: [
+      "¿El proyecto cumplió con los objetivos establecidos?",
+      "¿La ejecución del proyecto se realizó de manera adecuada?",
+      "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?",
+      "¿Los resultados obtenidos cumplieron con tus expectativas?",
+      "¿Qué tan satisfecho estás con el proyecto en general?"
+    ]
   },
+
   {
-    value: "Solicitud Técnica",
-    icon: "🛠️"
+    value: "Proyectos IA",
+    icon: "🤖",
+    questions: [
+      "¿La solución de IA cumplió con el objetivo planteado?",
+      "¿La solución implementada facilita el proceso para el cual fue desarrollada?",
+      "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?",
+      "¿Los resultados generados por la solución cumplen con tus expectativas?",
+      "¿Qué tan satisfecho estás con el proyecto de IA en general?"
+    ]
   },
+
   {
-    value: "Solicitud de Aplicaciones",
-    icon: "💻"
-  },
-  {
-    value: "Solicitud de Equipo",
-    icon: "🖥️"
+    value: "Proyectos Sistemas",
+    icon: "💻",
+    questions: [
+      "¿El proyecto cumplió con los requerimientos establecidos?",
+      "¿La solución implementada funciona de acuerdo con lo esperado?",
+      "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?",
+      "¿La solución implementada facilita tus actividades o procesos?",
+      "¿Qué tan satisfecho estás con el proyecto de Sistemas en general?"
+    ]
   }
 ];
+
 const LIKERT = [
   {v:1,lbl:"Muy malo", icon:"😠",color:"#e02020",mood:"malo1"},
   {v:2,lbl:"Malo",     icon:"😟",color:"#f97316",mood:"malo2"},
@@ -65,6 +78,7 @@ const LIKERT = [
   {v:4,lbl:"Bueno",    icon:"😊",color:"#22c55e",mood:"bueno"},
   {v:5,lbl:"Excelente",icon:"😄",color:"#38bdf8",mood:"excelente"}
 ];
+
 const REACTIONS = {
   malo1:    ["¡Vaya! Eso no estuvo bien. ¡Lo arreglaremos! 😱","¡Qué pena! Haremos todo para mejorar. 🙈","¡Eso duele, pero necesitamos saberlo! 😭","¡Error grave detectado! Modo urgente ON. 🚨","¡Lo sentimos mucho! Cambios vienen ya. 😰"],
   malo2:    ["Hmm, algo salió mal. ¡Trabajamos en ello! 😬","¡Oops! No fue lo ideal. Tomamos nota. 😅","¡Se puede mejorar, lo sabemos! 🤔","¡Modo mejora activado al 100%! 🛠️","¡Gracias por la honestidad! Mejoramos. 😤"],
@@ -96,7 +110,8 @@ let otherText = "";
 let showOther = false;
 let gameScoreFinal = 0;
 let dbCount = 0;
-let selectedRequestType = "";
+let selectedProjectType = "";
+let activeQuestions = [];
 
 // ════════════════════════════════════════════════════
 // UTILS
@@ -844,39 +859,49 @@ function renderGameReady(){
 }
 
 // ════════════════════════════════════════════════════
-// QUIZ
+// QUIZ — MAYITA PROYECTOS
 // ════════════════════════════════════════════════════
+
 function goToQuiz() {
   surveyAnswers = [];
   currentQ = 0;
   answering = false;
   selectedVal = null;
-  selectedRequestType = "";
+
+  selectedProjectType = "";
+  activeQuestions = [];
 
   showScreen("s-quiz");
-  renderRequestTypeQuestion();
+  renderProjectTypeQuestion();
 }
 
 
-function renderRequestTypeQuestion() {
+function renderProjectTypeQuestion() {
+
   document.getElementById(
     "quiz-progress-label"
-  ).textContent = "Tipo de solicitud";
+  ).textContent = "Tipo de proyecto";
 
-  const dots = document.getElementById("quiz-dots");
+  const dots =
+    document.getElementById("quiz-dots");
+
   dots.innerHTML = "";
 
-  const requestDot = document.createElement("div");
+  const projectDot =
+    document.createElement("div");
 
-  requestDot.className = "prog-dot";
-  requestDot.style.width = "22px";
-  requestDot.style.background =
+  projectDot.className = "prog-dot";
+  projectDot.style.width = "22px";
+  projectDot.style.background =
     "rgba(255,255,255,.65)";
 
-  dots.appendChild(requestDot);
+  dots.appendChild(projectDot);
 
-  QUESTIONS.forEach(() => {
-    const dot = document.createElement("div");
+  // Como actualmente todos tienen 5 preguntas
+  for (let i = 0; i < 5; i++) {
+
+    const dot =
+      document.createElement("div");
 
     dot.className = "prog-dot";
     dot.style.width = "10px";
@@ -884,16 +909,17 @@ function renderRequestTypeQuestion() {
       "rgba(255,255,255,.18)";
 
     dots.appendChild(dot);
-  });
+  }
 
   document.getElementById(
     "quiz-question"
   ).textContent =
-    "¿En qué tipo de solicitud te brindamos apoyo?";
+    "¿Qué tipo de proyecto deseas evaluar?";
 
   document.getElementById(
     "quiz-parrot"
-  ).innerHTML = parrotSVG("idle", 180);
+  ).innerHTML =
+    parrotSVG("idle", 180);
 
   const likertBar =
     document.querySelector(".likert-bar");
@@ -906,12 +932,17 @@ function renderRequestTypeQuestion() {
     document.getElementById("likert-opts");
 
   opts.innerHTML = "";
+
   opts.style.display = "grid";
+
   opts.style.gridTemplateColumns =
-    "repeat(2, minmax(0, 1fr))";
+    "repeat(1, minmax(0, 1fr))";
+
   opts.style.gap = "10px";
 
-  REQUEST_TYPES.forEach((requestType) => {
+
+  PROJECT_TYPES.forEach((project) => {
+
     const button =
       document.createElement("button");
 
@@ -919,44 +950,73 @@ function renderRequestTypeQuestion() {
     button.className = "imp-btn";
 
     button.style.minHeight = "76px";
-    button.style.justifyContent = "flex-start";
+    button.style.justifyContent =
+      "flex-start";
+
     button.style.textAlign = "left";
 
     button.innerHTML = `
-      <span style="font-size:1.45rem">
-        ${requestType.icon}
+      <span style="
+        font-size:1.55rem;
+        width:40px;
+        text-align:center;
+      ">
+        ${project.icon}
       </span>
 
-      <span>
-        ${requestType.value}
+      <span style="
+        font-weight:800;
+      ">
+        ${project.value}
       </span>
     `;
 
-    button.addEventListener("click", () => {
-      selectedRequestType =
-        requestType.value;
 
-      document
-        .querySelectorAll(
-          "#likert-opts .imp-btn"
-        )
-        .forEach((item) => {
-          item.classList.remove("sel");
-        });
+    button.addEventListener(
+      "click",
+      () => {
 
-      button.classList.add("sel");
+        selectedProjectType =
+          project.value;
 
-      requestDot.style.background =
-        "#ff8c42";
+        activeQuestions =
+          [...project.questions];
 
-      setTimeout(() => {
+        surveyAnswers = [];
         currentQ = 0;
-        renderQuiz();
-      }, 350);
-    });
+
+
+        document
+          .querySelectorAll(
+            "#likert-opts .imp-btn"
+          )
+          .forEach((item) => {
+            item.classList.remove("sel");
+          });
+
+
+        button.classList.add("sel");
+
+        projectDot.style.background =
+          "#ff8c42";
+
+
+        setTimeout(() => {
+
+          currentQ = 0;
+
+          renderQuiz();
+
+        }, 350);
+
+      }
+    );
+
 
     opts.appendChild(button);
+
   });
+
 
   document
     .getElementById("bubble-wrap")
@@ -964,121 +1024,342 @@ function renderRequestTypeQuestion() {
     ?.remove();
 }
 
+
 function renderQuiz() {
 
-  const likertBar =
+  if (!activeQuestions.length) {
+    renderProjectTypeQuestion();
+    return;
+  }
 
+
+  const likertBar =
     document.querySelector(".likert-bar");
 
   if (likertBar) {
-
     likertBar.style.display = "block";
-
   }
 
-  const opts =
 
+  const opts =
     document.getElementById("likert-opts");
 
   opts.style.display = "flex";
-
   opts.style.gridTemplateColumns = "";
-
   opts.style.gap = "6px";
-  // Progress dots
-  const dots=document.getElementById("quiz-dots");
-  dots.innerHTML="";
-  QUESTIONS.forEach((_,i)=>{
-    const d=document.createElement("div");
-    d.className="prog-dot";
-    d.id=`dot-${i}`;
-    d.style.width=i<surveyAnswers.length?"22px":"10px";
-    if(i<surveyAnswers.length) d.style.background=getLikertByVal(surveyAnswers[i]).color;
-    else if(i===currentQ) d.style.background="rgba(255,255,255,.65)";
+
+
+  // ─────────────────────────────────────
+  // PROGRESS DOTS
+  // ─────────────────────────────────────
+
+  const dots =
+    document.getElementById("quiz-dots");
+
+  dots.innerHTML = "";
+
+
+  activeQuestions.forEach((_, i) => {
+
+    const d =
+      document.createElement("div");
+
+    d.className = "prog-dot";
+    d.id = `dot-${i}`;
+
+    d.style.width =
+      i < surveyAnswers.length
+        ? "22px"
+        : "10px";
+
+
+    if (i < surveyAnswers.length) {
+
+      d.style.background =
+        getLikertByVal(
+          surveyAnswers[i]
+        ).color;
+
+    } else if (i === currentQ) {
+
+      d.style.background =
+        "rgba(255,255,255,.65)";
+
+    }
+
     dots.appendChild(d);
+
   });
 
-  document.getElementById("quiz-progress-label").textContent=`Pregunta ${currentQ+1}/${QUESTIONS.length}`;
-  document.getElementById("quiz-question").textContent=QUESTIONS[currentQ];
-  document.getElementById("quiz-parrot").innerHTML=parrotSVG("idle",180);
 
-  // Likert buttons
+  document.getElementById(
+    "quiz-progress-label"
+  ).textContent =
+    `${selectedProjectType} · ` +
+    `Pregunta ${currentQ + 1}/${activeQuestions.length}`;
+
+
+  document.getElementById(
+    "quiz-question"
+  ).textContent =
+    activeQuestions[currentQ];
+
+
+  document.getElementById(
+    "quiz-parrot"
+  ).innerHTML =
+    parrotSVG("idle", 180);
+
+
+  // ─────────────────────────────────────
+  // LIKERT
+  // ─────────────────────────────────────
+
   opts.innerHTML = "";
-  LIKERT.forEach(lk=>{
-    const b=document.createElement("button");
-    b.className="lk-btn";
-    b.dataset.val=lk.v;
-    b.style.background=`${lk.color}22`;
-    b.style.borderColor=`${lk.color}55`;
-    b.style.color=lk.color;
-    b.innerHTML=`<span class="lk-icon">${lk.icon}</span><span class="lk-num">${lk.v}</span><span class="lk-lbl">${lk.lbl}</span>`;
-    b.addEventListener("click",()=>handleAnswer(lk.v));
+
+
+  LIKERT.forEach((lk) => {
+
+    const b =
+      document.createElement("button");
+
+    b.className = "lk-btn";
+
+    b.dataset.val = lk.v;
+
+    b.style.background =
+      `${lk.color}22`;
+
+    b.style.borderColor =
+      `${lk.color}55`;
+
+    b.style.color =
+      lk.color;
+
+
+    b.innerHTML = `
+      <span class="lk-icon">
+        ${lk.icon}
+      </span>
+
+      <span class="lk-num">
+        ${lk.v}
+      </span>
+
+      <span class="lk-lbl">
+        ${lk.lbl}
+      </span>
+    `;
+
+
+    b.addEventListener(
+      "click",
+      () => handleAnswer(lk.v)
+    );
+
+
     opts.appendChild(b);
+
   });
 
-  // Thumb hidden
-  document.getElementById("likert-thumb").style.display="none";
-  // Remove old bubble
-  document.getElementById("bubble-wrap").querySelector(".bubble")?.remove();
+
+  document.getElementById(
+    "likert-thumb"
+  ).style.display = "none";
+
+
+  document
+    .getElementById("bubble-wrap")
+    .querySelector(".bubble")
+    ?.remove();
 }
 
-function handleAnswer(value){
-  if(answering) return;
-  answering=true;
-  selectedVal=value;
 
-  // Highlight selected
-  document.querySelectorAll(".lk-btn").forEach(b=>{
-    b.disabled=true;
-    if(parseInt(b.dataset.val)===value){
-      const lk=getLikertByVal(value);
-      b.classList.add("sel");
-      b.style.background=lk.color;
-      b.style.borderColor=lk.color;
-      b.style.color="#fff";
-      b.style.boxShadow=`0 8px 24px ${lk.color}55,0 0 0 4px ${lk.color}33`;
-    }
-  });
+function handleAnswer(value) {
+
+  if (answering) return;
+
+  answering = true;
+  selectedVal = value;
+
+
+  document
+    .querySelectorAll(".lk-btn")
+    .forEach((b) => {
+
+      b.disabled = true;
+
+      if (
+        parseInt(b.dataset.val) === value
+      ) {
+
+        const lk =
+          getLikertByVal(value);
+
+        b.classList.add("sel");
+
+        b.style.background =
+          lk.color;
+
+        b.style.borderColor =
+          lk.color;
+
+        b.style.color =
+          "#fff";
+
+        b.style.boxShadow =
+          `0 8px 24px ${lk.color}55,` +
+          `0 0 0 4px ${lk.color}33`;
+      }
+
+    });
+
 
   // Thumb
-  const thumb=document.getElementById("likert-thumb");
-  const lk=getLikertByVal(value);
-  thumb.style.display="block";
-  thumb.style.left=`${((value-1)/4)*100}%`;
-  thumb.style.background=lk.color;
 
-  // Parrot bounce + bubble
-  const mood=getMoodFromVal(value);
-  const qiText=REACTIONS[mood][currentQ];
-  document.getElementById("quiz-parrot").innerHTML=parrotSVG(mood,180);
-  const pSvg=document.getElementById("quiz-parrot").querySelector("svg");
-  pSvg.classList.remove("parrot-idle");
-  pSvg.classList.add("parrot-bounce");
+  const thumb =
+    document.getElementById(
+      "likert-thumb"
+    );
 
-  // Bubble
-  const wrap=document.getElementById("bubble-wrap");
-  wrap.querySelector(".bubble")?.remove();
-  const bub=document.createElement("div");
-  bub.className="bubble";
-  bub.style.borderColor=lk.color;
-  bub.innerHTML=`${qiText}<div class="tail-border" style="border-top:10px solid ${lk.color}"></div><div class="tail-white"></div>`;
-  wrap.insertBefore(bub,wrap.firstChild);
+  const lk =
+    getLikertByVal(value);
 
-  if(value>=4) boom();
+  thumb.style.display = "block";
 
-  setTimeout(()=>{
+  thumb.style.left =
+    `${((value - 1) / 4) * 100}%`;
+
+  thumb.style.background =
+    lk.color;
+
+
+  // Reacción de mayITa
+
+  const mood =
+    getMoodFromVal(value);
+
+  const reactionsForMood =
+    REACTIONS[mood] || [];
+
+  const qiText =
+    reactionsForMood[
+      currentQ % reactionsForMood.length
+    ] ||
+    "¡Gracias por tu respuesta! 🦜";
+
+
+  document.getElementById(
+    "quiz-parrot"
+  ).innerHTML =
+    parrotSVG(mood, 180);
+
+
+  const pSvg =
+    document
+      .getElementById("quiz-parrot")
+      .querySelector("svg");
+
+
+  if (pSvg) {
+
+    pSvg.classList.remove(
+      "parrot-idle"
+    );
+
+    pSvg.classList.add(
+      "parrot-bounce"
+    );
+
+  }
+
+
+  // Burbuja
+
+  const wrap =
+    document.getElementById(
+      "bubble-wrap"
+    );
+
+
+  wrap
+    .querySelector(".bubble")
+    ?.remove();
+
+
+  const bub =
+    document.createElement("div");
+
+
+  bub.className = "bubble";
+
+  bub.style.borderColor =
+    lk.color;
+
+
+  bub.innerHTML = `
+    ${qiText}
+
+    <div
+      class="tail-border"
+      style="
+        border-top:10px solid ${lk.color}
+      "
+    ></div>
+
+    <div class="tail-white"></div>
+  `;
+
+
+  wrap.insertBefore(
+    bub,
+    wrap.firstChild
+  );
+
+
+  if (value >= 4) {
+    boom();
+  }
+
+
+  setTimeout(() => {
+
     bub.remove();
-    surveyAnswers.push(value);
-    answering=false; selectedVal=null;
 
-    if(surveyAnswers.length>=QUESTIONS.length){
-      document.getElementById("quiz-parrot").innerHTML=parrotSVG("done",180);
-      setTimeout(()=>goToImprovement(),700);
+    surveyAnswers.push(
+      Number(value)
+    );
+
+    answering = false;
+    selectedVal = null;
+
+
+    if (
+      surveyAnswers.length >=
+      activeQuestions.length
+    ) {
+
+      document.getElementById(
+        "quiz-parrot"
+      ).innerHTML =
+        parrotSVG("done", 180);
+
+
+      setTimeout(
+        () => goToImprovement(),
+        700
+      );
+
     } else {
-      currentQ=surveyAnswers.length;
+
+      currentQ =
+        surveyAnswers.length;
+
       renderQuiz();
+
     }
-  },2500);
+
+  }, 2500);
 }
 
 // ════════════════════════════════════════════════════
@@ -1201,209 +1482,282 @@ document.getElementById("sug-textarea").addEventListener("input",function(){
 // SUBMIT + TEAMS
 // ════════════════════════════════════════════════════
 async function guardarEncuestaEnN8n(payload) {
+
   const response = await fetch(
-    "https://celaque.app.n8n.cloud/webhook/mayita/encuesta",
+    N8N_WEBHOOK_URL,
     {
       method: "POST",
+
       headers: {
         "Content-Type": "application/json"
       },
+
       body: JSON.stringify(payload)
     }
   );
 
-  const textoRespuesta = await response.text();
+
+  const textoRespuesta =
+    await response.text();
+
 
   let data = null;
 
+
   try {
-    data = textoRespuesta
-      ? JSON.parse(textoRespuesta)
-      : null;
+
+    data =
+      textoRespuesta
+        ? JSON.parse(textoRespuesta)
+        : null;
+
   } catch (error) {
+
     console.error(
       "La respuesta de n8n no es JSON válido:",
       textoRespuesta
     );
+
   }
 
+
   if (!response.ok) {
+
     throw new Error(
       data?.mensaje ||
       `n8n respondió con estado ${response.status}`
     );
+
   }
 
+
   if (!data?.ok) {
+
     throw new Error(
       data?.mensaje ||
       "n8n no confirmó el guardado."
     );
+
   }
 
-  return data;
-}async function guardarEncuestaEnN8n(payload) {
-  const response = await fetch(
-    "https://celaque.app.n8n.cloud/webhook/mayita/encuesta",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    }
-  );
-
-  const textoRespuesta = await response.text();
-
-  let data = null;
-
-  try {
-    data = textoRespuesta
-      ? JSON.parse(textoRespuesta)
-      : null;
-  } catch (error) {
-    console.error(
-      "La respuesta de n8n no es JSON válido:",
-      textoRespuesta
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.mensaje ||
-      `n8n respondió con estado ${response.status}`
-    );
-  }
-
-  if (!data?.ok) {
-    throw new Error(
-      data?.mensaje ||
-      "n8n no confirmó el guardado."
-    );
-  }
 
   return data;
 }
 
 async function handleSubmit() {
-  const textarea = document.getElementById("sug-textarea");
-  const botonEnviar = document.getElementById("btn-submit");
-  const errorSugerencia = document.getElementById("sug-err");
 
-  const sugerencia = textarea.value.trim();
+  const textarea =
+    document.getElementById(
+      "sug-textarea"
+    );
+
+  const botonEnviar =
+    document.getElementById(
+      "btn-submit"
+    );
+
+  const errorSugerencia =
+    document.getElementById(
+      "sug-err"
+    );
+
+
+  const sugerencia =
+    textarea.value.trim();
+
 
   if (!sugerencia) {
-    errorSugerencia.classList.add("show");
+
+    errorSugerencia
+      .classList
+      .add("show");
+
     textarea.focus();
+
     return;
   }
 
-if (!selectedRequestType) {
-  alert(
-    "Selecciona el tipo de solicitud en la que recibiste apoyo."
-  );
 
-  goToQuiz();
-  return;
-}
+  if (!selectedProjectType) {
 
-  if (surveyAnswers.length !== QUESTIONS.length) {
+    alert(
+      "Selecciona el tipo de proyecto que deseas evaluar."
+    );
+
+    goToQuiz();
+
+    return;
+  }
+
+
+  if (
+    surveyAnswers.length !==
+    activeQuestions.length
+  ) {
+
     alert(
       "No se encontraron todas las respuestas de la encuesta."
     );
+
     return;
   }
 
+
   botonEnviar.disabled = true;
-  errorSugerencia.classList.remove("show");
+
+  errorSugerencia
+    .classList
+    .remove("show");
+
 
   showScreen("s-sending");
 
-  const puntajeTotal = surveyAnswers.reduce(
-    (total, valor) => total + Number(valor || 0),
-    0
-  );
 
-  const porcentajeSatisfaccion = getScore();
+  const puntajeTotal =
+    surveyAnswers.reduce(
+      (total, valor) =>
+        total + Number(valor || 0),
+      0
+    );
 
-  const areasMejora = improvements.filter(
-    opcion => opcion !== "Otra"
-  );
+
+  const porcentajeSatisfaccion =
+    getScore();
+
+
+  const areasMejora =
+    improvements.filter(
+      opcion => opcion !== "Otra"
+    );
+
 
   const otraAreaMejora =
     improvements.includes("Otra")
       ? otherText.trim()
       : "";
 
+
+  // ─────────────────────────────────────
+  // RESPUESTAS DINÁMICAS
+  // ─────────────────────────────────────
+
+  const respuestas =
+    activeQuestions.map(
+      (pregunta, index) => ({
+        numeroPregunta:
+          index + 1,
+
+        pregunta,
+
+        valor:
+          Number(
+            surveyAnswers[index] || 0
+          )
+      })
+    );
+
+
   const payload = {
+
     usuario: {
-      nombre: msUser.name,
-      correo: msUser.email,
-      entraId: msUser.id
+      nombre:
+        msUser.name,
+
+      correo:
+        msUser.email,
+
+      entraId:
+        msUser.id
     },
 
-    tipoSolicitud: selectedRequestType,
 
-respuestas: {
-  tiempoRespuesta:
-    Number(surveyAnswers[0] || 0),
+    tipoProyecto:
+      selectedProjectType,
 
-  resolucionEfectiva:
-    Number(surveyAnswers[1] || 0),
 
-  comunicacionSeguimiento:
-    Number(surveyAnswers[2] || 0),
+    respuestas,
 
-  satisfaccionSolucion:
-    Number(surveyAnswers[3] || 0),
-
-  comunicacionClara:
-    Number(surveyAnswers[4] || 0)
-},
 
     puntajeTotal,
+
     porcentajeSatisfaccion,
+
     areasMejora,
+
     otraAreaMejora,
+
     sugerencia,
 
-    puntajeJuego:
-      Number(gameScoreFinal || 0),
 
-    origen: "GitHub Pages",
-    versionApp: APP_VERSION
+    puntajeJuego:
+      Number(
+        gameScoreFinal || 0
+      ),
+
+
+    origen:
+      "mayITa Proyectos",
+
+
+    versionApp:
+      APP_VERSION
   };
 
-  try {
-    const resultado =
-      await guardarEncuestaEnN8n(payload);
 
-    dbCount = Number(
-      resultado.respuestasGuardadas || 5
-    );
+  console.log(
+    "Payload mayITa Proyectos:",
+    payload
+  );
+
+
+  try {
+
+    const resultado =
+      await guardarEncuestaEnN8n(
+        payload
+      );
+
+
+    dbCount =
+      Number(
+        resultado.respuestasGuardadas ||
+        activeQuestions.length
+      );
+
 
     document.getElementById(
       "done-title"
     ).textContent =
       `¡Gracias, ${msUser.name}! 🎉`;
 
+
     document.getElementById(
       "done-parrot"
     ).innerHTML =
-      parrotSVG("done", 160);
+      parrotSVG(
+        "done",
+        160
+      );
 
-    const badge = document.getElementById(
-      "teams-status-badge"
-    );
 
-    badge.className = "teams-status ok";
-    badge.textContent = "✓ Guardada";
+    const badge =
+      document.getElementById(
+        "teams-status-badge"
+      );
+
+
+    badge.className =
+      "teams-status ok";
+
+    badge.textContent =
+      "✓ Guardada";
+
 
     document.getElementById(
       "teams-msg-text"
     ).textContent =
-      "Tu opinión fue registrada correctamente y será revisada por el equipo de TI.";
+      "Tu evaluación del proyecto fue registrada correctamente y será revisada por el equipo de TI.";
+
 
     document.getElementById(
       "db-sub-text"
@@ -1412,17 +1766,26 @@ respuestas: {
       `${dbCount} respuestas guardadas · ` +
       `${new Date().toLocaleString("es-HN")}`;
 
+
     showScreen("s-done");
 
+
   } catch (error) {
+
     console.error(
       "Error al guardar la encuesta:",
       error
     );
 
-    showScreen("s-suggestion");
 
-    botonEnviar.disabled = false;
+    showScreen(
+      "s-suggestion"
+    );
+
+
+    botonEnviar.disabled =
+      false;
+
 
     errorSugerencia.textContent =
       `⚠ No pudimos guardar la encuesta. ${
@@ -1430,7 +1793,11 @@ respuestas: {
         "Intenta nuevamente."
       }`;
 
-    errorSugerencia.classList.add("show");
+
+    errorSugerencia
+      .classList
+      .add("show");
+
   }
 }
 
@@ -1438,18 +1805,62 @@ respuestas: {
 // RESET
 // ════════════════════════════════════════════════════
 function resetAll(){
-  msUser={name:"",email:"",id:"",token:""};
-  surveyAnswers=[]; currentQ=0; answering=false; selectedVal=null;
-  improvements=[]; otherText=""; showOther=false;
-gameScoreFinal = 0;
-selectedRequestType = "";
 
-detenerControlesFlappy();
-fbReset();
-  if(typeof leaveTowerBlocks==="function") leaveTowerBlocks();
-  document.getElementById("intro-err").classList.remove("show");
-  document.getElementById("choose-err").classList.remove("show");
+  msUser = {
+    name:"",
+    email:"",
+    id:"",
+    token:""
+  };
+
+  surveyAnswers = [];
+
+  currentQ = 0;
+
+  answering = false;
+
+  selectedVal = null;
+
+  improvements = [];
+
+  otherText = "";
+
+  showOther = false;
+
+  gameScoreFinal = 0;
+
+  selectedProjectType = "";
+
+  activeQuestions = [];
+
+
+  detenerControlesFlappy();
+
+  fbReset();
+
+
+  if (
+    typeof leaveTowerBlocks ===
+    "function"
+  ) {
+    leaveTowerBlocks();
+  }
+
+
+  document
+    .getElementById("intro-err")
+    .classList
+    .remove("show");
+
+
+  document
+    .getElementById("choose-err")
+    .classList
+    .remove("show");
+
+
   resetChooseButtons();
+
   showScreen("s-intro");
 }
 
