@@ -131,7 +131,15 @@ const REACTIONS = {
   bueno:    ["¡Genial! ¡Eso es lo que queremos! 😊","¡Bien hecho equipo! ¡Seguimos así! 🥳","¡Crack total! El equipo da el 200%! 💪","¡Eso me alegra muchísimo! 🤩","¡Rumbo a la excelencia! 🚀"],
   excelente:["¡¡WOOOW!! ¡¡EL MEJOR EQUIPO!! 🏆","¡¡CAMPEONES!! ¡Así se hace en TI! 🎉","¡¡FIESTA!! ¡El equipo está on FIRE! 🔥","¡¡INCREÍBLE!! ¡Eres lo máximo! ⭐","¡¡AL 100%!! ¡Nada nos detiene! 🚀"]
 };
-const IMPROVEMENT_OPTIONS = ["Tiempo de respuesta","Conocimiento técnico","Comunicación y trato","Calidad de la solución","Seguimiento post-atención","Otra"];
+const IMPROVEMENT_OPTIONS = [
+  "Seguimiento del proyecto",
+  "Comunicación y coordinación",
+  "Claridad de procesos y aprobaciones",
+  "Cumplimiento de fechas",
+  "Gestión de riesgos y pendientes",
+  "Otra"
+];
+
 // Flappy game uses canvas — no FOODS array needed
 const MOTIV = [
   "¡Eres increíble! Cada reto es una oportunidad disfrazada. 🚀",
