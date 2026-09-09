@@ -88,32 +88,32 @@ const PROJECT_TYPES = [
     ]
   },
 
-  {
-    value: "Proyectos Sistemas",
-    icon: "💻",
-    questions: [
-      {
-        type: "likert",
-        text: "¿El proyecto cumplió con los requerimientos establecidos?"
-      },
-      {
-        type: "likert",
-        text: "¿La solución implementada funciona de acuerdo con lo esperado?"
-      },
-      {
-        type: "likert",
-        text: "¿La comunicación y el seguimiento durante el proyecto fueron adecuados?"
-      },
-      {
-        type: "likert",
-        text: "¿La solución implementada facilita tus actividades o procesos?"
-      },
-      {
-        type: "text",
-        text: "¿Qué podríamos mejorar en futuros proyectos de Sistemas?"
-      }
-    ]
-  }
+{
+  value: "Proyectos Sistemas",
+  icon: "💻",
+  questions: [
+    {
+      type: "likert",
+      text: "¿En qué medida la solución tecnológica entregada respondió a las necesidades y requerimientos definidos para el proyecto?"
+    },
+    {
+      type: "likert",
+      text: "¿Cómo calificarías la calidad y facilidad de uso de la solución implementada?"
+    },
+    {
+      type: "likert",
+      text: "¿Cómo calificarías tu experiencia general durante la gestión y ejecución del proyecto por parte del Departamento de Sistemas?"
+    },
+    {
+      type: "likert",
+      text: "¿Qué tan satisfecho(a) estás con el resultado final del proyecto?"
+    },
+    {
+      type: "text",
+      text: "Desde tu experiencia, ¿qué podríamos mejorar en futuros proyectos para brindarte un mejor servicio?"
+    }
+  ]
+}
 ];
 
 const LIKERT = [
