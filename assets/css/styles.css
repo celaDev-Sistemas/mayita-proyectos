@@ -172,7 +172,7 @@ textarea.input{resize:vertical;min-height:100px;}
   height:30px;
   min-width:30px;
   min-height:30px;
-  padding:0;              
+  padding:0;
   box-sizing:border-box;
   border-radius:50%;
   border:1.5px solid rgba(255,255,255,.18);
@@ -191,7 +191,7 @@ textarea.input{resize:vertical;min-height:100px;}
 .quiz-back-btn:disabled{opacity:.35;cursor:not-allowed;}
 
 #quiz-progress-label{
-  min-width:0;             /* 👈 permite que el texto se trunque/ajuste sin empujar nada */
+  min-width:0;
 }
 
 .prog-dots{
@@ -199,8 +199,8 @@ textarea.input{resize:vertical;min-height:100px;}
   gap:5px;
   justify-content:flex-end;
   min-width:60px;
-  flex-shrink:0;
 }
+.prog-dot{height:10px;border-radius:5px;transition:all .3s ease;background:rgba(255,255,255,.18);}
 
 /* ─ Score box ─ */
 .score-box{background:rgba(255,255,255,.07);border-radius:16px;padding:12px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
