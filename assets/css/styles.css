@@ -160,21 +160,26 @@ textarea.input{resize:vertical;min-height:100px;}
 
 /* ─ Progress dots ─ */
 .prog-row{
-  display:flex;
-  align-items:center;      /* 👈 esto centra TODO verticalmente, sin cálculos */
-  gap:12px;                /* 👈 espacio entre botón y texto */
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:12px;
   margin-bottom:16px;
 }
 
 .quiz-back-btn{
-  flex-shrink:0;            /
   width:30px;
   height:30px;
+  min-width:30px;
+  min-height:30px;
+  padding:0;              /* 👈 clave — anula el padding por defecto del <button> */
+  box-sizing:border-box;
   border-radius:50%;
   border:1.5px solid rgba(255,255,255,.18);
   background:rgba(255,255,255,.06);
   color:rgba(255,255,255,.75);
   font-size:.9rem;
+  line-height:1;
   font-weight:900;
   cursor:pointer;
   display:flex;
@@ -186,13 +191,13 @@ textarea.input{resize:vertical;min-height:100px;}
 .quiz-back-btn:disabled{opacity:.35;cursor:not-allowed;}
 
 #quiz-progress-label{
-  flex:1;                   
+  min-width:0;             /* 👈 permite que el texto se trunque/ajuste sin empujar nada */
 }
 
 .prog-dots{
   display:flex;
   gap:5px;
-  flex-shrink:0;             
+  justify-content:flex-end;
 }
 
 /* ─ Score box ─ */
