@@ -922,7 +922,9 @@ function renderGameReady(){
       <p style="color:rgba(255,255,255,.62);font-size:.87rem;line-height:1.65;margin-bottom:18px">
       <br>
         Vuela como guacamaya entre las tuberías.<br>
+        <br>
         <strong style="color:#fbbf24">Tap  · click · Espacio</strong> para volar.<br>
+        <br>
         ¡Pasa <strong style="color:#22c55e">todos los edificios</strong> que puedas!
       </p>
       <button class="btn-primary" style="margin-top:0" onclick="renderFlappyArena()">¡Jugar! 🎮</button>
