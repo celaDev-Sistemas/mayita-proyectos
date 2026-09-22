@@ -916,7 +916,7 @@ function renderGameReady(){
   detenerControlesFlappy();
   fbReset();
   document.getElementById("game-inner").innerHTML=`
-    <div style="text-align:center">
+    <div style="text-align:center;max-width:380px;margin:0 auto">
       <div id="game-parrot-ready" style="display:flex;justify-content:center;margin-bottom:18px"></div>
       <div style="color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:14px">¡Flappy mayITa! 🦜</div>
       <p style="color:rgba(255,255,255,.62);font-size:.87rem;line-height:1.8;margin-bottom:26px">
