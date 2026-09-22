@@ -920,6 +920,7 @@ function renderGameReady(){
       <div id="game-parrot-ready" style="display:flex;justify-content:center;margin-bottom:10px"></div>
       <div style="color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:8px">¡Flappy mayITa! 🦜</div>
       <p style="color:rgba(255,255,255,.62);font-size:.87rem;line-height:1.65;margin-bottom:18px">
+      <br>
         Vuela como guacamaya entre las tuberías.<br>
         <strong style="color:#fbbf24">Tap  · click · Espacio</strong> para volar.<br>
         ¡Pasa <strong style="color:#22c55e">todos los edificios</strong> que puedas!
