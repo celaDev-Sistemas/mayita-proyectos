@@ -165,6 +165,7 @@ let gameScoreFinal = 0;
 let dbCount = 0;
 let selectedProjectType = "";
 let activeQuestions = [];
+let quizScreenState = "type"; // "type" | "question"
 
 // ════════════════════════════════════════════════════
 // UTILS
@@ -947,7 +948,34 @@ function goToQuiz() {
 }
 
 
+// 👇 NUEVA FUNCIÓN
+function goBackQuiz() {
+
+  if (answering) return; // evita interrumpir animación de respuesta
+
+  if (quizScreenState === "question") {
+
+    if (currentQ > 0) {
+      currentQ--;
+      surveyAnswers.pop();
+      renderQuiz();
+    } else {
+      // primera pregunta del proyecto → volver a elegir tipo de proyecto
+      selectedProjectType = "";
+      activeQuestions = [];
+      surveyAnswers = [];
+      renderProjectTypeQuestion();
+    }
+
+  } else {
+    // estamos en "Tipo de proyecto" → volver a elegir juego
+    showScreen("s-choose");
+  }
+}
+
 function renderProjectTypeQuestion() {
+
+    quizScreenState = "type"; // 👈 nueva línea
 
   document.getElementById(
     "quiz-progress-label"
@@ -1116,6 +1144,9 @@ function renderProjectTypeQuestion() {
 
 
 function renderQuiz() {
+
+    quizScreenState = "question"; // 👈 nueva línea
+
 
   if (!activeQuestions.length) {
 
@@ -1477,7 +1508,8 @@ function handleAnswer(value) {
       }
 
     });
-
+  
+document.getElementById("quiz-back-btn")?.setAttribute("disabled", "true"); // 👈 nueva línea
 
   const thumb =
     document.getElementById(
@@ -1617,6 +1649,8 @@ function handleAnswer(value) {
 
     selectedVal =
       null;
+
+      document.getElementById("quiz-back-btn")?.removeAttribute("disabled"); // 👈 nueva línea
 
 
     avanzarPregunta();
