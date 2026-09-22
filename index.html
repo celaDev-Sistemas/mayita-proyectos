@@ -242,10 +242,21 @@
   <!-- ═══════════════════════════════════════════════════
        PANTALLA: ENCUESTA
   ════════════════════════════════════════════════════ -->
-  <div
-    id="s-quiz"
-    class="card screen"
+<div
+  id="s-quiz"
+  class="card screen"
+  style="position:relative;"
+>
+  <button
+    type="button"
+    class="quiz-back-btn"
+    id="quiz-back-btn"
+    onclick="goBackQuiz()"
+    aria-label="Regresar"
   >
+    ←
+  </button>
+
     <div class="prog-row">
       <span
         id="quiz-progress-label"
